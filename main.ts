@@ -29,12 +29,20 @@ function validate(line: string): void {
   if (line !== line.trim()) {
     throw new Error("excuse must not start or end with whitespace");
   }
+  // A one-word excuse is not an excuse: the line must read as a sentence.
+  if (!line.includes(" ")) {
+    throw new Error("excuse must be more than a single word");
+  }
 }
 
 function main(): void {
   const line = EXCUSE.trim();
   validate(line);
-  const outDir = process.env.OUTPUT_DIR ?? "/output";
+  // An explicitly empty OUTPUT_DIR used to resolve to "/entry.txt" at the
+  // filesystem root; treat blank the same as unset and fall back to /output.
+  const outDir = process.env.OUTPUT_DIR?.trim()
+    ? process.env.OUTPUT_DIR
+    : "/output";
   mkdirSync(outDir, { recursive: true });
   const outPath = `${outDir}/entry.txt`;
   writeFileSync(outPath, line, { encoding: "utf8", mode: 0o644 });
